@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard ♡ Chutis</title>
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -101,18 +100,24 @@
       border: none; border-radius: 50%;
       width: 20px; height: 20px; font-size: 11px; cursor: pointer;
     }
+
+    .contact-item-box {
+      background: #faf8f7; border: 1px dashed var(--border-color);
+      border-radius: 16px; padding: 12px; margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- หน้าล็อกอิน: ใช้ placeholder ว่างๆ ปลอดภัย ไม่โชว์รหัสหรืออีเมล -->
     <div id="loginView">
       <div class="login-card">
         <h2 style="color:var(--color-brown); margin-bottom:20px;">Admin Login ♡ Chutis</h2>
         <form onsubmit="handleLogin(event)">
-          <input type="email" id="emailInput" class="input-field" placeholder="chamnanwet0@gmail.com" required>
-          <input type="password" id="passwordInput" class="input-field" placeholder="c*h0noi&quot;gcse" required>
+          <input type="email" id="emailInput" class="input-field" placeholder="email" required>
+          <input type="password" id="passwordInput" class="input-field" placeholder="password" required>
           <button type="submit" class="btn-dark">เข้าสู่ระบบ ✨</button>
-          <p id="loginError" style="color:#ef4444; font-size:12px; margin-top:10px; display:none;">อีเมลหรือรหัสผ่านไม่ถูกต้องค่ะ</p>
+          <p id="loginError" style="color:#ef4444; font-size:12px; margin-top:10px; display:none;">email หรือ password ไม่ถูกต้องค่ะ</p>
         </form>
       </div>
     </div>
@@ -150,21 +155,18 @@
         </div>
       </div>
 
-      <!-- 2. ข้อมูลการติดต่อ & เพลง -->
+      <!-- 2. ข้อมูลการติดต่อ & เพลง (เพิ่ม/ลบได้อิสระ) -->
       <div class="panel-card">
-        <div class="panel-title"><span>🔗 ข้อมูลการติดต่อ & เพลง</span></div>
+        <div class="panel-title">
+          <span>🔗 ช่องทางติดต่อ (เพิ่ม/ลบเองได้)</span>
+          <button type="button" class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="addNewContact()">+ เพิ่มช่องทาง</button>
+        </div>
         <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">คำอธิบายหน้า Contact:</label>
         <input type="text" id="contactDescInput" class="input-field" placeholder="ติดต่อด่วนที่ ไลน์ @094rchoe">
 
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Twitter / X (ลิงก์ และ แฮนเดิล):</label>
-        <input type="url" id="twitterUrlInput" class="input-field" placeholder="https://x.com/chullmy">
-        <input type="text" id="twitterHandleInput" class="input-field" placeholder="@chullmy">
+        <div id="contactsAdminContainer"></div>
 
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Line Official (ลิงก์ และ ไอดี):</label>
-        <input type="url" id="lineUrlInput" class="input-field" placeholder="https://lin.ee/XnaKBCX">
-        <input type="text" id="lineHandleInput" class="input-field" placeholder="@094rchoe">
-
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">ลิงก์เพลงประกอบ (.mp3):</label>
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-top:10px; margin-bottom:4px;">ลิงก์เพลงประกอบ (.mp3):</label>
         <input type="url" id="musicUrlInput" class="input-field" placeholder="URL เพลง .mp3">
       </div>
 
@@ -203,7 +205,6 @@
   </div>
 
   <script>
-    // ข้อมูลล็อกอินแอดมินตามบรีฟ
     const AUTH_EMAIL = "chamnanwet0@gmail.com";
     const AUTH_PASS = "c*h0noi\"gcse";
 
@@ -233,10 +234,10 @@
       hlSectionTitle: "Highlights",
       reviewCardTitle: "review chutis",
       contactDesc: "ติดต่อด่วนที่ ไลน์ @094rchoe",
-      twitterUrl: "https://x.com/chullmy",
-      twitterHandle: "@chullmy",
-      lineUrl: "https://lin.ee/XnaKBCX",
-      lineHandle: "@094rchoe",
+      contacts: [
+        { title: "Twitter", handle: "@chullmy", url: "https://x.com/chullmy" },
+        { title: "Line official", handle: "@094rchoe", url: "https://lin.ee/XnaKBCX" }
+      ],
       musicUrl: "https://files.catbox.moe/dm8ddi.mp3",
       details: "ยินดีต้อนรับสู่ร้าน Chutis ♡\nสามารถติดต่อสอบถาม หรืออ่านเงื่อนไขบริการต่างๆ ได้เลยนะคะ"
     };
@@ -294,14 +295,44 @@
       document.getElementById('hlSectionTitleInput').value = siteConfig.hlSectionTitle || 'Highlights';
       document.getElementById('reviewCardTitleInput').value = siteConfig.reviewCardTitle || 'review chutis';
       document.getElementById('contactDescInput').value = siteConfig.contactDesc || '';
-      document.getElementById('twitterUrlInput').value = siteConfig.twitterUrl || '';
-      document.getElementById('twitterHandleInput').value = siteConfig.twitterHandle || '';
-      document.getElementById('lineUrlInput').value = siteConfig.lineUrl || '';
-      document.getElementById('lineHandleInput').value = siteConfig.lineHandle || '';
       document.getElementById('musicUrlInput').value = siteConfig.musicUrl || '';
       document.getElementById('detailsInput').value = siteConfig.details || '';
       
+      renderContactsAdmin();
       renderHighlightsAdmin();
+    }
+
+    // จัดการรายชื่อช่องทางติดต่อ
+    function renderContactsAdmin() {
+      const box = document.getElementById('contactsAdminContainer');
+      box.innerHTML = '';
+      if (!siteConfig.contacts) siteConfig.contacts = [];
+
+      siteConfig.contacts.forEach((c, idx) => {
+        const item = document.createElement('div');
+        item.className = 'contact-item-box';
+        item.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="font-size:12px; color:var(--color-brown);">ช่องทางที่ ${idx + 1}</strong>
+            <button type="button" onclick="removeContact(${idx})" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer;">ลบ</button>
+          </div>
+          <input type="text" class="input-field" style="margin-bottom:6px;" value="${c.title || ''}" placeholder="ชื่อช่องทาง (เช่น Twitter, Line, IG)" oninput="siteConfig.contacts[${idx}].title = this.value">
+          <input type="text" class="input-field" style="margin-bottom:6px;" value="${c.handle || ''}" placeholder="ชื่อแสดง/ไอดี (เช่น @chullmy)" oninput="siteConfig.contacts[${idx}].handle = this.value">
+          <input type="url" class="input-field" style="margin-bottom:0;" value="${c.url || ''}" placeholder="ลิงก์ URL (เช่น https://...)" oninput="siteConfig.contacts[${idx}].url = this.value">
+        `;
+        box.appendChild(item);
+      });
+    }
+
+    function addNewContact() {
+      if (!siteConfig.contacts) siteConfig.contacts = [];
+      siteConfig.contacts.push({ title: "ช่องทางใหม่", handle: "@username", url: "https://" });
+      renderContactsAdmin();
+    }
+
+    function removeContact(idx) {
+      siteConfig.contacts.splice(idx, 1);
+      renderContactsAdmin();
     }
 
     function renderHighlightsAdmin() {
@@ -341,7 +372,7 @@
             <input type="text" class="input-field" style="margin-top:4px;" value="${hl.cover || ''}" placeholder="URL หน้าปก" onchange="highlightsList[${idx}].cover = this.value">
           </div>
           <div style="font-size:12px; margin-bottom:6px; color:var(--text-muted);">
-            + อัปโหลดรูปสตอรี่เพิ่ม (เลือกได้หลายรูปพร้อมกัน): <input type="file" accept="image/*" multiple onchange="uploadStoryImgs(event, ${idx})">
+            + อัปโหลดรูปสตอรี่เพิ่ม: <input type="file" accept="image/*" multiple onchange="uploadStoryImgs(event, ${idx})">
           </div>
           <div class="stories-grid">${imgsHtml}</div>
         `;
@@ -437,17 +468,12 @@
       siteConfig.hlSectionTitle = document.getElementById('hlSectionTitleInput').value.trim();
       siteConfig.reviewCardTitle = document.getElementById('reviewCardTitleInput').value.trim();
       siteConfig.contactDesc = document.getElementById('contactDescInput').value.trim();
-      siteConfig.twitterUrl = document.getElementById('twitterUrlInput').value.trim();
-      siteConfig.twitterHandle = document.getElementById('twitterHandleInput').value.trim();
-      siteConfig.lineUrl = document.getElementById('lineUrlInput').value.trim();
-      siteConfig.lineHandle = document.getElementById('lineHandleInput').value.trim();
       siteConfig.musicUrl = document.getElementById('musicUrlInput').value.trim();
       siteConfig.details = document.getElementById('detailsInput').value;
 
       try {
         await db.collection(DB_CONFIG).doc("main").set(siteConfig);
 
-        // แยกบันทึกแต่ละไฮไลท์เป็นเอกสารของตัวเอง จึงเพิ่มรูปได้ไม่จำกัดและไม่ติด Limit 1MB
         for (let i = 0; i < highlightsList.length; i++) {
           const hl = highlightsList[i];
           const hlData = {

@@ -187,7 +187,6 @@
     }
     .banner-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    /* ปรับแต่งตำแหน่งและขนาดโปรไฟล์ + โบว์ด้านบน */
     .profile-wrap {
       display: flex;
       justify-content: center;
@@ -226,7 +225,7 @@
 
     .profile-frame {
       position: absolute;
-      top: -24px; /* ดึงโบว์ขึ้นไปสวมบนหัวรูป */
+      top: -24px;
       left: 50%;
       transform: translateX(-50%);
       width: 122px;
@@ -266,7 +265,6 @@
       margin: 22px 0 12px 2px;
       display: flex;
       align-items: center;
-      gap: 6px;
     }
 
     .highlights-row {
@@ -587,8 +585,9 @@
 ติดต่อด่วนที่ ไลน์ @094rchoe
       </div>
 
+      <!-- ลบอีโมจิซากุระออกแล้ว -->
       <div class="section-label">
-        <span>🌸</span> <span id="hlSectionTitle">Highlights</span>
+        <span id="hlSectionTitle">Highlights</span>
       </div>
 
       <div class="highlights-row" id="highlightsBar"></div>
@@ -613,7 +612,7 @@
       </div>
 
       <div class="section-label">
-        <span>💬</span> <span>♡ รีวิวทั้งหมด</span>
+        <span>♡ รีวิวทั้งหมด</span>
       </div>
       <div id="feedbackFeed"></div>
     </div>
@@ -635,29 +634,8 @@
 ติดต่อด่วนที่ ไลน์ @094rchoe
       </div>
 
-      <div class="contact-card-box" id="contactLinksContainer">
-        <a id="twitterLink" href="https://x.com/chullmy" target="_blank" class="contact-bubble-link">
-          <div class="contact-bubble-left">
-            <div class="contact-circle-icon">𝕏</div>
-            <div>
-              <div style="font-weight:700; font-size:14px;" id="twTitle">Twitter</div>
-              <div style="font-size:12px; color:var(--text-muted);" id="twSub">@chullmy</div>
-            </div>
-          </div>
-          <span style="color:var(--color-brown); font-size:14px; font-weight:700;">→</span>
-        </a>
-
-        <a id="lineLink" href="https://lin.ee/XnaKBCX" target="_blank" class="contact-bubble-link">
-          <div class="contact-bubble-left">
-            <div class="contact-circle-icon">💬</div>
-            <div>
-              <div style="font-weight:700; font-size:14px;" id="lineTitle">Line official</div>
-              <div style="font-size:12px; color:var(--text-muted);" id="lineSub">@094rchoe</div>
-            </div>
-          </div>
-          <span style="color:var(--color-brown); font-size:14px; font-weight:700;">→</span>
-        </a>
-      </div>
+      <!-- ช่องทางติดต่อเพิ่ม/ลบอัตโนมัติตามแอดมิน -->
+      <div class="contact-card-box" id="contactLinksContainer"></div>
     </div>
 
   </div>
@@ -734,15 +712,43 @@
       if (d.contactDesc) document.getElementById('contactDescText').textContent = d.contactDesc;
       if (d.details) document.getElementById('detailsContentText').textContent = d.details;
       
-      if (d.twitterUrl) document.getElementById('twitterLink').href = d.twitterUrl;
-      if (d.twitterHandle) document.getElementById('twSub').textContent = d.twitterHandle;
-      if (d.lineUrl) document.getElementById('lineLink').href = d.lineUrl;
-      if (d.lineHandle) document.getElementById('lineSub').textContent = d.lineHandle;
+      // แสดงรายชื่อ Contact ตามที่แอดมินตั้ง
+      renderContacts(d.contacts || [
+        { title: "Twitter", handle: "@chullmy", url: "https://x.com/chullmy" },
+        { title: "Line official", handle: "@094rchoe", url: "https://lin.ee/XnaKBCX" }
+      ]);
 
       if (d.musicUrl && audio.src !== d.musicUrl) {
         audio.src = d.musicUrl;
         unlockAudio();
       }
+    }
+
+    function renderContacts(list) {
+      const box = document.getElementById('contactLinksContainer');
+      box.innerHTML = '';
+      if (!list || !list.length) {
+        box.innerHTML = '<p style="text-align:center; font-size:12px; color:var(--text-muted); padding:10px;">ยังไม่มีช่องทางติดต่อ</p>';
+        return;
+      }
+      list.forEach(c => {
+        if (!c.url) return;
+        const a = document.createElement('a');
+        a.href = c.url;
+        a.target = '_blank';
+        a.className = 'contact-bubble-link';
+        a.innerHTML = `
+          <div class="contact-bubble-left">
+            <div class="contact-circle-icon">💬</div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">${c.title || 'ติดต่อ'}</div>
+              <div style="font-size:12px; color:var(--text-muted);">${c.handle || ''}</div>
+            </div>
+          </div>
+          <span style="color:var(--color-brown); font-size:14px; font-weight:700;">→</span>
+        `;
+        box.appendChild(a);
+      });
     }
 
     db.collection(DB_CONFIG).doc("main").onSnapshot(doc => {

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard ♡ Chutis</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --color-brown: #91766E;
+      --color-brown-dark: #6e554d;
+      --color-vanilla: #EFD8D6;
+      --color-fantasy: #F7F3ED;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --border-color: rgba(145, 118, 110, 0.25);
+      --text-main: #4a3b37;
+      --text-muted: #8c7872;
+      --shadow: 0 10px 30px rgba(145, 118, 110, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', 'Mitr', sans-serif; }
+    body {
+      background: radial-gradient(circle at top, #ffffff 0%, var(--color-fantasy) 60%, #eae3db 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+      display: flex;
+      justify-content: center;
+    }
+    .container { width: 100%; max-width: 480px; }
+    #loginView { min-height: 75vh; display: flex; flex-direction: column; justify-content: center; }
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 28px;
+      padding: 36px 24px;
+      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border-color);
+      text-align: center;
+    }
+    .input-field, .textarea-field {
+      width: 100%; padding: 12px 16px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 16px; font-size: 13.5px;
+      background: #fff; color: var(--text-main);
+      outline: none; margin-bottom: 12px;
+    }
+    .input-field:focus, .textarea-field:focus { border-color: var(--color-brown); }
+    .btn-dark {
+      width: 100%;
+      background: linear-gradient(135deg, var(--color-brown), var(--color-brown-dark));
+      color: #fff; border: none; padding: 13px;
+      border-radius: 20px; font-size: 14px;
+      font-weight: 700; cursor: pointer;
+      box-shadow: 0 6px 16px rgba(145, 118, 110, 0.25);
+    }
+    .btn-outline {
+      background: #ffffff;
+      border: 1.5px solid var(--border-color);
+      color: var(--color-brown);
+      padding: 8px 16px; border-radius: 16px;
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
+    }
+    #dashboardView { display: none; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .panel-card {
+      background: var(--card-bg);
+      border-radius: 24px; padding: 20px 16px;
+      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border-color);
+      margin-bottom: 18px;
+    }
+    .panel-title {
+      font-size: 15px; font-weight: 700;
+      color: var(--color-brown); margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hl-admin-card {
+      background: #fff; border: 1px solid var(--border-color);
+      border-radius: 18px; padding: 14px; margin-bottom: 14px;
+    }
+    .stories-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 8px; margin-top: 10px;
+    }
+    .story-slot {
+      position: relative; aspect-ratio: 1;
+      border-radius: 12px; border: 1px dashed var(--border-color);
+      overflow: hidden; background: #faf8f7;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .story-slot img { width: 100%; height: 100%; object-fit: cover; }
+    .del-btn {
+      position: absolute; top: 2px; right: 2px;
+      background: rgba(110, 85, 77, 0.85); color: #fff;
+      border: none; border-radius: 50%;
+      width: 20px; height: 20px; font-size: 11px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loginView">
+      <div class="login-card">
+        <h2 style="color:var(--color-brown); margin-bottom:20px;">Admin Login ♡ Chutis</h2>
+        <form onsubmit="handleLogin(event)">
+          <input type="email" id="emailInput" class="input-field" placeholder="chamnanwet0@gmail.com" required>
+          <input type="password" id="passwordInput" class="input-field" placeholder="c*h0noi&quot;gcse" required>
+          <button type="submit" class="btn-dark">เข้าสู่ระบบ ✨</button>
+          <p id="loginError" style="color:#ef4444; font-size:12px; margin-top:10px; display:none;">อีเมลหรือรหัสผ่านไม่ถูกต้องค่ะ</p>
+        </form>
+      </div>
+    </div>
+
+    <div id="dashboardView">
+      <div class="top-bar">
+        <div style="font-weight:700; color:var(--color-brown); font-size:18px;">Dashboard ♡ Chutis</div>
+        <button onclick="handleLogout()" class="btn-outline">ออกระบบ</button>
+      </div>
+
+      <!-- 1. ข้อมูลร้านและรูปภาพ -->
+      <div class="panel-card">
+        <div class="panel-title"><span>🎀 ข้อมูลร้านและรูปภาพ</span></div>
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">ชื่อร้าน:</label>
+        <input type="text" id="storeNameInput" class="input-field">
+        
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">ข้อความแนะนำตัว (Bio):</label>
+        <textarea id="storeBioInput" class="textarea-field" rows="3"></textarea>
+        
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; color:var(--text-muted); font-weight:700; display:block; margin-bottom:4px;">รูปแบนเนอร์ (อัปโหลด หรือ วางลิงก์):</label>
+          <input type="file" accept="image/*" onchange="uploadDirect(event, 'bannerImg')">
+          <input type="text" id="bannerImgUrl" class="input-field" style="margin-top:6px;" placeholder="URL แบนเนอร์">
+        </div>
+        
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; color:var(--text-muted); font-weight:700; display:block; margin-bottom:4px;">รูปโปรไฟล์ (อัปโหลด หรือ วางลิงก์):</label>
+          <input type="file" accept="image/*" onchange="uploadDirect(event, 'profileImg')">
+          <input type="text" id="profileImgUrl" class="input-field" style="margin-top:6px;" placeholder="URL โปรไฟล์">
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; color:var(--text-muted); font-weight:700; display:block; margin-bottom:4px;">กรอบโปรไฟล์ (URL รูปกรอบ PNG):</label>
+          <input type="text" id="profileFrameUrl" class="input-field" placeholder="URL กรอบโปรไฟล์">
+        </div>
+      </div>
+
+      <!-- 2. ข้อมูลการติดต่อ & เพลง -->
+      <div class="panel-card">
+        <div class="panel-title"><span>🔗 ข้อมูลการติดต่อ & เพลง</span></div>
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">คำอธิบายหน้า Contact:</label>
+        <input type="text" id="contactDescInput" class="input-field" placeholder="ติดต่อด่วนที่ ไลน์ @094rchoe">
+
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Twitter / X (ลิงก์ และ แฮนเดิล):</label>
+        <input type="url" id="twitterUrlInput" class="input-field" placeholder="https://x.com/chullmy">
+        <input type="text" id="twitterHandleInput" class="input-field" placeholder="@chullmy">
+
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Line Official (ลิงก์ และ ไอดี):</label>
+        <input type="url" id="lineUrlInput" class="input-field" placeholder="https://lin.ee/XnaKBCX">
+        <input type="text" id="lineHandleInput" class="input-field" placeholder="@094rchoe">
+
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">ลิงก์เพลงประกอบ (.mp3):</label>
+        <input type="url" id="musicUrlInput" class="input-field" placeholder="URL เพลง .mp3">
+      </div>
+
+      <!-- 3. Details & ข้อความรีวิว -->
+      <div class="panel-card">
+        <div class="panel-title"><span>📝 เนื้อหา Details & หัวข้อรีวิว</span></div>
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">หัวข้อหมวดไฮไลท์:</label>
+        <input type="text" id="hlSectionTitleInput" class="input-field" placeholder="Highlights">
+
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">หัวข้อการ์ดรีวิว:</label>
+        <input type="text" id="reviewCardTitleInput" class="input-field" placeholder="review chutis">
+
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">เนื้อหาหน้ารายละเอียด (Details):</label>
+        <textarea id="detailsInput" class="textarea-field" rows="5"></textarea>
+      </div>
+
+      <!-- 4. ไฮไลท์สตอรี่ไม่จำกัดจำนวน -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>🌸 ไฮไลท์สตอรี่ (เพิ่มได้ไม่จำกัด)</span>
+          <button type="button" class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="addNewHighlight()">+ เพิ่มไฮไลท์ใหม่</button>
+        </div>
+        <div id="hlAdminList"></div>
+      </div>
+
+      <button type="button" class="btn-dark" id="saveBtn" style="font-size:15px; padding:14px; margin-bottom:20px;" onclick="saveAll()">
+        ☁️ บันทึกขึ้นระบบทันที (หน้าเว็บเปลี่ยนสด) ♡
+      </button>
+
+      <!-- 5. จัดการรีวิว -->
+      <div class="panel-card">
+        <div class="panel-title"><span>💬 จัดการรีวิวจากลูกค้า</span></div>
+        <div id="reviewsBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ข้อมูลล็อกอินแอดมินตามบรีฟ
+    const AUTH_EMAIL = "chamnanwet0@gmail.com";
+    const AUTH_PASS = "c*h0noi\"gcse";
+
+    const DB_CONFIG = "chutis_config";
+    const DB_HL = "chutis_highlights";
+    const DB_REVIEWS = "chutis_reviews";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCpAGDSy1NRgmLV_g7qJrCpwOhU9MrfQyY",
+      authDomain: "benefitie.firebaseapp.com",
+      projectId: "benefitie",
+      storageBucket: "benefitie.firebasestorage.app",
+      messagingSenderId: "270365672215",
+      appId: "1:270365672215:web:230d1491091e26ce83ed52"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let siteConfig = {
+      siteTitle: "Chutis ♡",
+      storeName: "Chutis",
+      storeBio: "ยินดีต้อนรับสู่ร้าน Chutis ♡\nติดต่อด่วนที่ ไลน์ @094rchoe",
+      bannerImg: "https://files.catbox.moe/qqpvr2.jpeg",
+      profileImg: "https://files.catbox.moe/hyk7hs.jpeg",
+      profileFrame: "https://files.catbox.moe/41rka4.png",
+      hlSectionTitle: "Highlights",
+      reviewCardTitle: "review chutis",
+      contactDesc: "ติดต่อด่วนที่ ไลน์ @094rchoe",
+      twitterUrl: "https://x.com/chullmy",
+      twitterHandle: "@chullmy",
+      lineUrl: "https://lin.ee/XnaKBCX",
+      lineHandle: "@094rchoe",
+      musicUrl: "https://files.catbox.moe/dm8ddi.mp3",
+      details: "ยินดีต้อนรับสู่ร้าน Chutis ♡\nสามารถติดต่อสอบถาม หรืออ่านเงื่อนไขบริการต่างๆ ได้เลยนะคะ"
+    };
+
+    let highlightsList = [];
+
+    window.onload = function() {
+      if (sessionStorage.getItem('chutis_auth') === 'true') {
+        showDashboard();
+      }
+    };
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const mail = document.getElementById('emailInput').value.trim();
+      const pass = document.getElementById('passwordInput').value.trim();
+      if (mail === AUTH_EMAIL && pass === AUTH_PASS) {
+        sessionStorage.setItem('chutis_auth', 'true');
+        showDashboard();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('chutis_auth');
+      location.reload();
+    }
+
+    async function showDashboard() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('dashboardView').style.display = 'block';
+
+      try {
+        const doc = await db.collection(DB_CONFIG).doc("main").get();
+        if (doc.exists) siteConfig = { ...siteConfig, ...doc.data() };
+        
+        const hlSnap = await db.collection(DB_HL).orderBy("order", "asc").get();
+        highlightsList = [];
+        hlSnap.forEach(d => {
+          highlightsList.push({ id: d.id, ...d.data() });
+        });
+      } catch (err) {}
+
+      renderFields();
+      listenReviews();
+    }
+
+    function renderFields() {
+      document.getElementById('storeNameInput').value = siteConfig.storeName || '';
+      document.getElementById('storeBioInput').value = siteConfig.storeBio || '';
+      document.getElementById('bannerImgUrl').value = siteConfig.bannerImg || '';
+      document.getElementById('profileImgUrl').value = siteConfig.profileImg || '';
+      document.getElementById('profileFrameUrl').value = siteConfig.profileFrame || '';
+      document.getElementById('hlSectionTitleInput').value = siteConfig.hlSectionTitle || 'Highlights';
+      document.getElementById('reviewCardTitleInput').value = siteConfig.reviewCardTitle || 'review chutis';
+      document.getElementById('contactDescInput').value = siteConfig.contactDesc || '';
+      document.getElementById('twitterUrlInput').value = siteConfig.twitterUrl || '';
+      document.getElementById('twitterHandleInput').value = siteConfig.twitterHandle || '';
+      document.getElementById('lineUrlInput').value = siteConfig.lineUrl || '';
+      document.getElementById('lineHandleInput').value = siteConfig.lineHandle || '';
+      document.getElementById('musicUrlInput').value = siteConfig.musicUrl || '';
+      document.getElementById('detailsInput').value = siteConfig.details || '';
+      
+      renderHighlightsAdmin();
+    }
+
+    function renderHighlightsAdmin() {
+      const box = document.getElementById('hlAdminList');
+      box.innerHTML = '';
+
+      if (highlightsList.length === 0) {
+        box.innerHTML = '<p style="font-size:12px; color:var(--text-muted); padding:10px 0;">ยังไม่มีไฮไลท์ กดปุ่ม "+ เพิ่มไฮไลท์ใหม่" ได้เลยค่ะ</p>';
+        return;
+      }
+
+      highlightsList.forEach((hl, idx) => {
+        const card = document.createElement('div');
+        card.className = 'hl-admin-card';
+
+        let imgsHtml = '';
+        if (hl.images) {
+          hl.images.forEach((img, imgIdx) => {
+            imgsHtml += `
+              <div class="story-slot">
+                <img src="${img}">
+                <button class="del-btn" onclick="removeStoryImg(${idx}, ${imgIdx})">✕</button>
+              </div>
+            `;
+          });
+        }
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-weight:700; color:var(--color-brown); font-size:13.5px;">ไฮไลท์ที่ ${idx + 1}</div>
+            <button onclick="removeHighlight(${idx})" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer;">ลบไฮไลท์นี้ 🗑️</button>
+          </div>
+          <input type="text" class="input-field" value="${hl.title || ''}" placeholder="ชื่อไฮไลท์" onchange="highlightsList[${idx}].title = this.value">
+          
+          <div style="font-size:12px; margin-bottom:6px; color:var(--text-muted);">
+            รูปปกไฮไลท์ (อัปโหลด หรือ วางลิงก์): <input type="file" accept="image/*" onchange="uploadCover(event, ${idx})">
+            <input type="text" class="input-field" style="margin-top:4px;" value="${hl.cover || ''}" placeholder="URL หน้าปก" onchange="highlightsList[${idx}].cover = this.value">
+          </div>
+          <div style="font-size:12px; margin-bottom:6px; color:var(--text-muted);">
+            + อัปโหลดรูปสตอรี่เพิ่ม (เลือกได้หลายรูปพร้อมกัน): <input type="file" accept="image/*" multiple onchange="uploadStoryImgs(event, ${idx})">
+          </div>
+          <div class="stories-grid">${imgsHtml}</div>
+        `;
+        box.appendChild(card);
+      });
+    }
+
+    function addNewHighlight() {
+      highlightsList.push({
+        title: `Highlight ${highlightsList.length + 1}`,
+        cover: "",
+        images: [],
+        order: highlightsList.length
+      });
+      renderHighlightsAdmin();
+    }
+
+    async function removeHighlight(idx) {
+      if (confirm(`ต้องการลบไฮไลท์ที่ ${idx + 1} ใช่หรือไม่?`)) {
+        const item = highlightsList[idx];
+        if (item.id) {
+          await db.collection(DB_HL).doc(item.id).delete();
+        }
+        highlightsList.splice(idx, 1);
+        renderHighlightsAdmin();
+      }
+    }
+
+    function compressImg(file, maxWidth = 640, quality = 0.7) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadDirect(e, key) {
+      if (e.target.files && e.target.files[0]) {
+        siteConfig[key] = await compressImg(e.target.files[0], 650, 0.72);
+        if (key === 'bannerImg') document.getElementById('bannerImgUrl').value = siteConfig[key];
+        if (key === 'profileImg') document.getElementById('profileImgUrl').value = siteConfig[key];
+      }
+    }
+
+    async function uploadCover(e, idx) {
+      if (e.target.files && e.target.files[0]) {
+        highlightsList[idx].cover = await compressImg(e.target.files[0], 250, 0.7);
+        renderHighlightsAdmin();
+      }
+    }
+
+    async function uploadStoryImgs(e, idx) {
+      const files = Array.from(e.target.files);
+      if (!highlightsList[idx].images) highlightsList[idx].images = [];
+      for (const f of files) {
+        const b64 = await compressImg(f, 640, 0.68);
+        highlightsList[idx].images.push(b64);
+      }
+      renderHighlightsAdmin();
+    }
+
+    function removeStoryImg(hlIdx, imgIdx) {
+      highlightsList[hlIdx].images.splice(imgIdx, 1);
+      renderHighlightsAdmin();
+    }
+
+    async function saveAll() {
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true;
+      btn.textContent = "กำลังบันทึกข้อมูล... ⏳";
+
+      siteConfig.storeName = document.getElementById('storeNameInput').value;
+      siteConfig.storeBio = document.getElementById('storeBioInput').value;
+      siteConfig.bannerImg = document.getElementById('bannerImgUrl').value.trim();
+      siteConfig.profileImg = document.getElementById('profileImgUrl').value.trim();
+      siteConfig.profileFrame = document.getElementById('profileFrameUrl').value.trim();
+      siteConfig.hlSectionTitle = document.getElementById('hlSectionTitleInput').value.trim();
+      siteConfig.reviewCardTitle = document.getElementById('reviewCardTitleInput').value.trim();
+      siteConfig.contactDesc = document.getElementById('contactDescInput').value.trim();
+      siteConfig.twitterUrl = document.getElementById('twitterUrlInput').value.trim();
+      siteConfig.twitterHandle = document.getElementById('twitterHandleInput').value.trim();
+      siteConfig.lineUrl = document.getElementById('lineUrlInput').value.trim();
+      siteConfig.lineHandle = document.getElementById('lineHandleInput').value.trim();
+      siteConfig.musicUrl = document.getElementById('musicUrlInput').value.trim();
+      siteConfig.details = document.getElementById('detailsInput').value;
+
+      try {
+        await db.collection(DB_CONFIG).doc("main").set(siteConfig);
+
+        // แยกบันทึกแต่ละไฮไลท์เป็นเอกสารของตัวเอง จึงเพิ่มรูปได้ไม่จำกัดและไม่ติด Limit 1MB
+        for (let i = 0; i < highlightsList.length; i++) {
+          const hl = highlightsList[i];
+          const hlData = {
+            title: hl.title || `Highlight ${i + 1}`,
+            cover: hl.cover || (hl.images && hl.images[0]) || "",
+            images: hl.images || [],
+            order: i
+          };
+          if (hl.id) {
+            await db.collection(DB_HL).doc(hl.id).set(hlData);
+          } else {
+            const docRef = await db.collection(DB_HL).add(hlData);
+            hl.id = docRef.id;
+          }
+        }
+
+        alert("✨ บันทึกข้อมูลขึ้นระบบร้าน Chutis เรียบร้อยแล้วค่ะ!");
+      } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "☁️ บันทึกขึ้นระบบทันที (หน้าเว็บเปลี่ยนสด) ♡";
+      }
+    }
+
+    function listenReviews() {
+      db.collection(DB_REVIEWS).orderBy("createdAt", "desc").onSnapshot(snap => {
+        const box = document.getElementById('reviewsBox');
+        box.innerHTML = '';
+        if (snap.empty) {
+          box.innerHTML = '<p style="text-align:center; font-size:12px; color:var(--text-muted);">ยังไม่มีรีวิว</p>';
+          return;
+        }
+        snap.forEach(doc => {
+          const d = doc.data();
+          const div = document.createElement('div');
+          div.style = "background:#fff; border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+          div.innerHTML = `
+            <div>
+              <div style="font-weight:700; font-size:13px; color:var(--color-brown);">${d.name} (${'★'.repeat(d.stars || 5)})</div>
+              <div style="font-size:12px; color:var(--text-main); margin-top:2px;">${d.msg}</div>
+            </div>
+            <button onclick="deleteReview('${doc.id}')" style="background:#f7ebe9; border:none; color:#ef4444; padding:4px 8px; border-radius:8px; font-size:11px; cursor:pointer;">ลบ</button>
+          `;
+          box.appendChild(div);
+        });
+      });
+    }
+
+    async function deleteReview(id) {
+      if (confirm("ต้องการลบรีวิวนี้ใช่หรือไม่?")) {
+        await db.collection(DB_REVIEWS).doc(id).delete();
+      }
+    }
+  </script>
+</body>
+</html>

@@ -109,7 +109,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- หน้าล็อกอิน: ใช้ placeholder ว่างๆ ปลอดภัย ไม่โชว์รหัสหรืออีเมล -->
     <div id="loginView">
       <div class="login-card">
         <h2 style="color:var(--color-brown); margin-bottom:20px;">Admin Login ♡ Chutis</h2>
@@ -155,10 +154,10 @@
         </div>
       </div>
 
-      <!-- 2. ข้อมูลการติดต่อ & เพลง (เพิ่ม/ลบได้อิสระ) -->
+      <!-- 2. ข้อมูลการติดต่อ เพลง & เอฟเฟกต์คลิก -->
       <div class="panel-card">
         <div class="panel-title">
-          <span>🔗 ช่องทางติดต่อ (เพิ่ม/ลบเองได้)</span>
+          <span>🔗 ช่องทางติดต่อ & ลูกเล่น</span>
           <button type="button" class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="addNewContact()">+ เพิ่มช่องทาง</button>
         </div>
         <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">คำอธิบายหน้า Contact:</label>
@@ -168,6 +167,12 @@
 
         <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-top:10px; margin-bottom:4px;">ลิงก์เพลงประกอบ (.mp3):</label>
         <input type="url" id="musicUrlInput" class="input-field" placeholder="URL เพลง .mp3">
+
+        <div style="margin-top:12px;">
+          <label style="font-size:12px; color:var(--text-muted); font-weight:700; display:block; margin-bottom:4px;">รูปลูกเล่นตอนแตะหน้าจอ (Click Effect PNG):</label>
+          <input type="file" accept="image/*" onchange="uploadDirect(event, 'clickEffectImg')">
+          <input type="text" id="clickEffectImgUrl" class="input-field" style="margin-top:6px;" placeholder="URL รูปเอฟเฟกต์ตอนกด">
+        </div>
       </div>
 
       <!-- 3. Details & ข้อความรีวิว -->
@@ -183,7 +188,7 @@
         <textarea id="detailsInput" class="textarea-field" rows="5"></textarea>
       </div>
 
-      <!-- 4. ไฮไลท์สตอรี่ไม่จำกัดจำนวน -->
+      <!-- 4. ไฮไลท์สตอรี่ -->
       <div class="panel-card">
         <div class="panel-title">
           <span>🌸 ไฮไลท์สตอรี่ (เพิ่มได้ไม่จำกัด)</span>
@@ -231,6 +236,7 @@
       bannerImg: "https://files.catbox.moe/qqpvr2.jpeg",
       profileImg: "https://files.catbox.moe/hyk7hs.jpeg",
       profileFrame: "https://files.catbox.moe/41rka4.png",
+      clickEffectImg: "https://files.catbox.moe/wkkr9g.png",
       hlSectionTitle: "Highlights",
       reviewCardTitle: "review chutis",
       contactDesc: "ติดต่อด่วนที่ ไลน์ @094rchoe",
@@ -292,6 +298,7 @@
       document.getElementById('bannerImgUrl').value = siteConfig.bannerImg || '';
       document.getElementById('profileImgUrl').value = siteConfig.profileImg || '';
       document.getElementById('profileFrameUrl').value = siteConfig.profileFrame || '';
+      document.getElementById('clickEffectImgUrl').value = siteConfig.clickEffectImg || 'https://files.catbox.moe/wkkr9g.png';
       document.getElementById('hlSectionTitleInput').value = siteConfig.hlSectionTitle || 'Highlights';
       document.getElementById('reviewCardTitleInput').value = siteConfig.reviewCardTitle || 'review chutis';
       document.getElementById('contactDescInput').value = siteConfig.contactDesc || '';
@@ -302,7 +309,6 @@
       renderHighlightsAdmin();
     }
 
-    // จัดการรายชื่อช่องทางติดต่อ
     function renderContactsAdmin() {
       const box = document.getElementById('contactsAdminContainer');
       box.innerHTML = '';
@@ -427,9 +433,11 @@
 
     async function uploadDirect(e, key) {
       if (e.target.files && e.target.files[0]) {
-        siteConfig[key] = await compressImg(e.target.files[0], 650, 0.72);
-        if (key === 'bannerImg') document.getElementById('bannerImgUrl').value = siteConfig[key];
-        if (key === 'profileImg') document.getElementById('profileImgUrl').value = siteConfig[key];
+        const b64 = await compressImg(e.target.files[0], 650, 0.72);
+        siteConfig[key] = b64;
+        if (key === 'bannerImg') document.getElementById('bannerImgUrl').value = b64;
+        if (key === 'profileImg') document.getElementById('profileImgUrl').value = b64;
+        if (key === 'clickEffectImg') document.getElementById('clickEffectImgUrl').value = b64;
       }
     }
 
@@ -465,6 +473,7 @@
       siteConfig.bannerImg = document.getElementById('bannerImgUrl').value.trim();
       siteConfig.profileImg = document.getElementById('profileImgUrl').value.trim();
       siteConfig.profileFrame = document.getElementById('profileFrameUrl').value.trim();
+      siteConfig.clickEffectImg = document.getElementById('clickEffectImgUrl').value.trim();
       siteConfig.hlSectionTitle = document.getElementById('hlSectionTitleInput').value.trim();
       siteConfig.reviewCardTitle = document.getElementById('reviewCardTitleInput').value.trim();
       siteConfig.contactDesc = document.getElementById('contactDescInput').value.trim();

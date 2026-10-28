@@ -78,25 +78,25 @@
       }
     }
 
+    /* เอฟเฟกต์รูปภาพตอนแตะหน้าจอ */
     .click-petal {
       position: fixed;
       pointer-events: none;
       z-index: 999999;
-      width: 15px;
-      height: 20px;
-      background: linear-gradient(135deg, #ffffff 10%, #ffb6c7 60%, #e88d9f 100%);
-      border-radius: 12px 2px 12px 2px;
-      box-shadow: 0 2px 8px rgba(247, 168, 184, 0.6);
-      animation: burstPetal 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(145, 118, 110, 0.3));
+      animation: burstPetal 0.85s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
     }
 
     @keyframes burstPetal {
       0% {
-        transform: translate(0, 0) scale(0.6) rotate(0deg);
+        transform: translate(0, 0) scale(0.4) rotate(0deg);
         opacity: 1;
       }
       100% {
-        transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(var(--rot));
+        transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(var(--rot));
         opacity: 0;
       }
     }
@@ -585,7 +585,6 @@
 ติดต่อด่วนที่ ไลน์ @094rchoe
       </div>
 
-      <!-- ลบอีโมจิซากุระออกแล้ว -->
       <div class="section-label">
         <span id="hlSectionTitle">Highlights</span>
       </div>
@@ -634,7 +633,6 @@
 ติดต่อด่วนที่ ไลน์ @094rchoe
       </div>
 
-      <!-- ช่องทางติดต่อเพิ่ม/ลบอัตโนมัติตามแอดมิน -->
       <div class="contact-card-box" id="contactLinksContainer"></div>
     </div>
 
@@ -657,6 +655,9 @@
     const DB_CONFIG = "chutis_config";
     const DB_HL = "chutis_highlights";
     const DB_REVIEWS = "chutis_reviews";
+
+    const DEFAULT_CLICK_EFFECT = "https://files.catbox.moe/wkkr9g.png";
+    let activeClickEffectImg = DEFAULT_CLICK_EFFECT;
 
     const firebaseConfig = {
       apiKey: "AIzaSyCpAGDSy1NRgmLV_g7qJrCpwOhU9MrfQyY",
@@ -711,8 +712,8 @@
       if (d.reviewCardTitle) document.getElementById('reviewCardTitle').textContent = d.reviewCardTitle;
       if (d.contactDesc) document.getElementById('contactDescText').textContent = d.contactDesc;
       if (d.details) document.getElementById('detailsContentText').textContent = d.details;
+      if (d.clickEffectImg) activeClickEffectImg = d.clickEffectImg;
       
-      // แสดงรายชื่อ Contact ตามที่แอดมินตั้ง
       renderContacts(d.contacts || [
         { title: "Twitter", handle: "@chullmy", url: "https://x.com/chullmy" },
         { title: "Line official", handle: "@094rchoe", url: "https://lin.ee/XnaKBCX" }
@@ -937,16 +938,18 @@
       setTimeout(() => petal.remove(), 14000);
     }, 900);
 
+    // ปรับใช้รูปที่กำหนด แตกกระจายออกมาเยอะๆ ทุกครั้งที่กด
     window.addEventListener('pointerdown', (e) => {
-      const count = 4 + Math.floor(Math.random() * 3);
+      const count = 6 + Math.floor(Math.random() * 4);
       for (let i = 0; i < count; i++) {
-        const p = document.createElement('div');
+        const p = document.createElement('img');
+        p.src = activeClickEffectImg;
         p.className = 'click-petal';
-        p.style.left = (e.clientX - 8) + 'px';
-        p.style.top = (e.clientY - 10) + 'px';
+        p.style.left = (e.clientX - 12) + 'px';
+        p.style.top = (e.clientY - 12) + 'px';
         
         const angle = Math.random() * Math.PI * 2;
-        const dist = 30 + Math.random() * 50;
+        const dist = 35 + Math.random() * 60;
         const dx = Math.cos(angle) * dist + 'px';
         const dy = Math.sin(angle) * dist - 25 + 'px';
         const rot = (Math.random() * 360 - 180) + 'deg';
@@ -956,7 +959,7 @@
         p.style.setProperty('--rot', rot);
         
         document.body.appendChild(p);
-        setTimeout(() => p.remove(), 900);
+        setTimeout(() => p.remove(), 850);
       }
     }, { passive: true });
   </script>

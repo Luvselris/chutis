@@ -45,7 +45,6 @@
       position: relative;
     }
 
-    /* เลเยอร์ซากุระร่วง */
     .sakura-layer {
       position: fixed;
       inset: 0;
@@ -79,7 +78,6 @@
       }
     }
 
-    /* ซากุระตอนแตะหน้าจอ (Click Particle) */
     .click-petal {
       position: fixed;
       pointer-events: none;
@@ -111,7 +109,6 @@
       z-index: 2;
     }
 
-    /* Top Nav Tabs */
     .top-nav {
       background: var(--card-bg);
       border: 1.5px solid var(--border-soft);
@@ -178,7 +175,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* แบนเนอร์ */
     .banner-box {
       width: 100%;
       height: 155px;
@@ -191,7 +187,7 @@
     }
     .banner-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    /* โปรไฟล์และกรอบ 41rka4.png */
+    /* ปรับแต่งตำแหน่งและขนาดโปรไฟล์ + โบว์ด้านบน */
     .profile-wrap {
       display: flex;
       justify-content: center;
@@ -201,23 +197,23 @@
 
     .profile-container {
       position: relative;
-      width: 108px;
-      height: 108px;
+      width: 86px;
+      height: 86px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .profile-circle {
-      width: 80px;
-      height: 80px;
+      width: 82px;
+      height: 82px;
       border-radius: 50%;
       overflow: hidden;
       background: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 3px solid #ffffff;
+      border: 3.5px solid #ffffff;
       box-shadow: 0 6px 18px rgba(145, 118, 110, 0.2);
     }
     .profile-circle img {
@@ -230,11 +226,11 @@
 
     .profile-frame {
       position: absolute;
-      top: 50%;
+      top: -24px; /* ดึงโบว์ขึ้นไปสวมบนหัวรูป */
       left: 50%;
-      transform: translate(-50%, -50%);
-      width: 108px;
-      height: 108px;
+      transform: translateX(-50%);
+      width: 122px;
+      height: auto;
       pointer-events: none;
       z-index: 3;
       object-fit: contain;
@@ -322,7 +318,6 @@
       font-weight: 600;
     }
 
-    /* Credit (Review) Tab */
     .review-form-card {
       background: var(--card-bg);
       border: 1.5px solid var(--border-soft);
@@ -425,7 +420,6 @@
       white-space: pre-line;
     }
 
-    /* Details & Contact Tab */
     .details-white-card {
       background: #ffffff;
       border: 1.5px solid var(--border-soft);
@@ -480,7 +474,6 @@
       color: var(--color-brown);
     }
 
-    /* Story Fullscreen Viewer */
     .story-modal {
       position: fixed;
       inset: 0;
@@ -557,15 +550,11 @@
 </head>
 <body>
 
-  <!-- เลเยอร์ซากุระร่วง -->
   <div class="sakura-layer" id="sakuraLayer"></div>
-
-  <!-- เพลงประกอบ -->
   <audio id="bgMusic" loop preload="auto" src="https://files.catbox.moe/dm8ddi.mp3"></audio>
 
   <div class="container">
 
-    <!-- Top Navigation Bar -->
     <div class="top-nav">
       <div class="nav-tabs">
         <button type="button" class="tab-btn active" onclick="switchNavTab('home')">home</button>
@@ -647,7 +636,6 @@
       </div>
 
       <div class="contact-card-box" id="contactLinksContainer">
-        <!-- Twitter / X -->
         <a id="twitterLink" href="https://x.com/chullmy" target="_blank" class="contact-bubble-link">
           <div class="contact-bubble-left">
             <div class="contact-circle-icon">𝕏</div>
@@ -659,7 +647,6 @@
           <span style="color:var(--color-brown); font-size:14px; font-weight:700;">→</span>
         </a>
 
-        <!-- Line Official -->
         <a id="lineLink" href="https://lin.ee/XnaKBCX" target="_blank" class="contact-bubble-link">
           <div class="contact-bubble-left">
             <div class="contact-circle-icon">💬</div>
@@ -675,7 +662,6 @@
 
   </div>
 
-  <!-- Story Modal -->
   <div class="story-modal" id="storyModal">
     <div class="story-bars" id="storyBars"></div>
     <div class="story-header">
@@ -690,7 +676,6 @@
   </div>
 
   <script>
-    // แยกฐานข้อมูลเฉพาะ Chutis 100%
     const DB_CONFIG = "chutis_config";
     const DB_HL = "chutis_highlights";
     const DB_REVIEWS = "chutis_reviews";
@@ -760,12 +745,10 @@
       }
     }
 
-    // ดึงการตั้งค่าร้าน
     db.collection(DB_CONFIG).doc("main").onSnapshot(doc => {
       if (doc.exists) applyData(doc.data());
     });
 
-    // ดึงไฮไลท์
     db.collection(DB_HL).orderBy("order", "asc").onSnapshot(snap => {
       highlightsData = [];
       snap.forEach(doc => highlightsData.push(doc.data()));
@@ -792,7 +775,6 @@
       });
     }
 
-    // Story System
     let activeHlIdx = 0;
     let activeSlideIdx = 0;
     let slideTimer = null;
@@ -879,7 +861,6 @@
     bindTap(document.getElementById('storyNavRight'), nextStorySlide);
     bindTap(document.getElementById('storyNavLeft'), prevStorySlide);
 
-    // Reviews
     let currentRating = 5;
     function selectStar(num) {
       currentRating = num;
@@ -938,7 +919,6 @@
       });
     });
 
-    // สร้างกลีบซากุระร่วงต่อเนื่อง
     const sakuraContainer = document.getElementById('sakuraLayer');
     setInterval(() => {
       const petal = document.createElement('div');
@@ -951,7 +931,6 @@
       setTimeout(() => petal.remove(), 14000);
     }, 900);
 
-    // แตะตรงไหนมีดอกซากุระฟุ้งขึ้นมาตรงนั้น
     window.addEventListener('pointerdown', (e) => {
       const count = 4 + Math.floor(Math.random() * 3);
       for (let i = 0; i < count; i++) {

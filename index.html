@@ -78,29 +78,29 @@
       }
     }
 
-    /* เอฟเฟกต์รูปภาพตอนแตะหน้าจอ (แสดง 1 รูป) */
+    /* เอฟเฟกต์รูปภาพตอนแตะหน้าจอ (ปรับขนาดใหญ่ขึ้น) */
     .click-petal {
       position: fixed;
       pointer-events: none;
       z-index: 999999;
-      width: 26px;
-      height: 26px;
+      width: 48px;
+      height: 48px;
       object-fit: contain;
-      filter: drop-shadow(0 3px 8px rgba(145, 118, 110, 0.35));
-      animation: singlePop 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+      filter: drop-shadow(0 4px 10px rgba(145, 118, 110, 0.35));
+      animation: singlePop 0.85s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
     }
 
     @keyframes singlePop {
       0% {
-        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+        transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
         opacity: 0;
       }
-      20% {
-        transform: translate(-50%, -50%) scale(1.15) rotate(-10deg);
+      25% {
+        transform: translate(-50%, -50%) scale(1.1) rotate(-8deg);
         opacity: 1;
       }
       100% {
-        transform: translate(-50%, -45px) scale(0.9) rotate(15deg);
+        transform: translate(-50%, -60px) scale(0.95) rotate(12deg);
         opacity: 0;
       }
     }
@@ -942,7 +942,7 @@
       setTimeout(() => petal.remove(), 14000);
     }, 900);
 
-    // ตอนแตะหน้าจอ: ปรับให้ขึ้น PNG เพียง 1 อันตรงจุดที่แตะ
+    // ตอนแตะหน้าจอ: สร้างรูป PNG ขนาดใหญ่ 1 ชิ้นตรงจุดที่แตะ
     window.addEventListener('pointerdown', (e) => {
       const p = document.createElement('img');
       p.src = activeClickEffectImg;
@@ -951,7 +951,7 @@
       p.style.top = e.clientY + 'px';
       
       document.body.appendChild(p);
-      setTimeout(() => p.remove(), 800);
+      setTimeout(() => p.remove(), 850);
     }, { passive: true });
   </script>
 </body>
